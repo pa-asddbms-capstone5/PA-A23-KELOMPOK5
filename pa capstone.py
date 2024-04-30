@@ -1,20 +1,20 @@
-import pwinput 
+import pwinput
 import os
 from prettytable import prettytable
 import mysql.connector
 import random
-
+import time
 
 #--------Common---------#
 def clear():
-    os.system("cls")
+    os.system("cls" if os.name == "nt" else "clear")
 
 def conn():
     try:
         connection = mysql.connector.connect(
-            host="localhost",
-            user="root", 
-            password="",
+            host="103.54.170.117",
+            user="paasd", 
+            password="Paasd1234!",
             database="paasd"
         )
         return connection
@@ -23,7 +23,10 @@ def conn():
 
 def err_conn(err):
     print("Error:", err)
-    input("Gagal membuat akun user.")
+    print("|         -----------------------------------------------------       |")
+    print("|                      Pembuatan Akun User Gagal                      |")
+    print("|         -----------------------------------------------------       |")
+    input("\nTekan Enter untuk melanjutkan...")
     clear()
     return
 
@@ -38,6 +41,7 @@ class DoubleLinkedList:
     def __init__(self):
         self.head = None
         self.tail = None
+        self._size = 0  # Menambahkan atribut _size untuk menyimpan jumlah elemen dalam linked list
 
     def append(self, data):
         new_node = Node(data)
@@ -48,6 +52,7 @@ class DoubleLinkedList:
             new_node.prev = self.tail
             self.tail.next = new_node
             self.tail = new_node
+        self._size += 1  # Menambahkan 1 ke _size setiap kali sebuah elemen ditambahkan
 
     def display(self):
         current = self.head
@@ -55,11 +60,94 @@ class DoubleLinkedList:
             print(current.data, end=" ")
             current = current.next
         print()
+        
+    def size(self):
+        return self._size
+
 
 class EkosistemDarat:
     def __init__(self):
         self.connection = conn()
         self.ekosistem_list = DoubleLinkedList()
+
+    def _get_middle(self, head):
+        if head is None:
+            return None
+        
+        slow = head
+        fast = head
+        
+        while fast.next and fast.next.next:
+            slow = slow.next
+            fast = fast.next.next
+        
+        return slow
+
+    # Definisikan metode merge_sort_id_ekosistem di sini
+    def merge_sort_id_ekosistem(self, head, order='asc'):
+        if head is None or head.next is None:
+            return head
+        
+        middle = self._get_middle(head)
+        next_to_middle = middle.next
+        
+        middle.next = None
+        
+        left = self.merge_sort_id_ekosistem(head, order)
+        right = self.merge_sort_id_ekosistem(next_to_middle, order)
+        
+        sorted_list = self._merge(left, right, order)
+        return sorted_list
+
+    def _merge(self, left, right, order='asc'):
+        result = None
+        
+        if left is None:
+            return right
+        if right is None:
+            return left
+        
+        if order == 'asc':
+            if left.data[0] <= right.data[0]:
+                result = left
+                result.next = self._merge(left.next, right, order)
+            else:
+                result = right
+                result.next = self._merge(left, right.next, order)
+        elif order == 'desc':
+            if left.data[0] >= right.data[0]:
+                result = left
+                result.next = self._merge(left.next, right, order)
+            else:
+                result = right
+                result.next = self._merge(left, right.next, order)
+        
+        return result
+    # Fungsi untuk melakukan jump search berdasarkan nama_ekosistem
+    def jump_search_nama_ekosistem(self, target):
+        if self.ekosistem_list.head is None:
+            print("Linked list kosong.")
+            return -1
+        
+        n = self.ekosistem_list.size()
+        step = int(n ** 0.5)
+        prev = None
+        current = self.ekosistem_list.head
+        
+        while current and current.data[1] < target:
+            prev = current
+            for _ in range(step):
+                if current.next:
+                    current = current.next
+                else:
+                    break
+        
+        while current and current.data[1] >= target:
+            if current.data[1] == target:
+                return current.data
+            current = current.prev
+        
+        return -1
 
     def create(self, id_admin):
         if self.connection:
@@ -82,7 +170,9 @@ class EkosistemDarat:
                 self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memasukkan data ke database ekosistem darat.")
+                print("|         -----------------------------------------------------       |")
+                print("|            Gagal Memasukan Data ke Database Ekosistem Darat         |")
+                print("|         -----------------------------------------------------       |")
                 input("Tekan Enter untuk kembali ke menu user...")
                 clear()
                 self.menu(id_admin)
@@ -90,7 +180,9 @@ class EkosistemDarat:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -113,6 +205,9 @@ class EkosistemDarat:
                     clear()
                     self.menu(id_admin)
                 else:
+                    print("|         -----------------------------------------------------       |")
+                    print("|                   Data Ekosistem Darat Tidak Tersedia               |")
+                    print("|         -----------------------------------------------------       |")
                     print("Tidak ada data ekosistem_darat yang tersedia.")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
@@ -120,14 +215,18 @@ class EkosistemDarat:
                 cursor.close()
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal membaca data dari database ekosistem darat.")
+                print("|         -----------------------------------------------------       |")
+                print("|                   Data Spesies Tumbuhan Gagal Dibaca                |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
             finally:
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -150,21 +249,27 @@ class EkosistemDarat:
                     clear()
                     menu_user(id_user)
                 else:
-                    print("Tidak ada data ekosistem_darat yang tersedia.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                   Data Ekosistem Darat Tidak Tersedia               |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu user...")
                     clear()
                     menu_user(id_user)
                 cursor.close()
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal membaca data dari database ekosistem darat.")
-                input("\nTekan Enter untuk kembali ke menu admin...")
+                print("|         -----------------------------------------------------       |")
+                print("|                   Data Ekosistem Darat Gagal Dibaca                 |")
+                print("|         -----------------------------------------------------       |")
+                input("\nTekan Enter untuk kembali ke menu user...")
                 clear()
                 menu_user(id_user)
             finally:
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             menu_user(id_user)
@@ -208,25 +313,33 @@ class EkosistemDarat:
                     cursor.execute(update_query, update_values)
 
                     self.connection.commit()
-                    print("Data berhasil diperbarui di tabel ekosistem darat.")
+                    print("|        --------------------------------------------------------       |")
+                    print("|         Data Ekosistem Darat Berhasil Diperbarui Pada Database        |")
+                    print("|        --------------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data ekosistem darat dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                 Data Ekosistem Darat Tidak Ditemukan                |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memperbarui data di tabel ekosistem darat.")
+                print("|         -----------------------------------------------------       |")
+                print("|                 Gagal Memperbarui Data Ekosistem Darat              |")
+                print("|         -----------------------------------------------------       |")
                 input("Tekan Enter untuk kembali ke menu admin...")
                 self.menu(id_admin)
             finally:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -269,18 +382,24 @@ class EkosistemDarat:
                         clear()
                         self.menu(id_admin)
                     else:
-                        print("Penghapusan data dibatalkan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|              Penghapusan Data Ekosistem Darat Dibatalkan            |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu admin...")
                         clear()
                         self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data ekosistem darat dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                 Tidak Ditemukan Data Ekosistem Darat                |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal menghapus data dari tabel ekosistem darat.")
+                print("|         -----------------------------------------------------       |")
+                print("|                 Gagal Menghapus Data Ekosistem Darat                |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
@@ -288,21 +407,25 @@ class EkosistemDarat:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
 
     def menu(self, id_admin):
         print('''
-============================================================
-‖                     MENU EKOSISTEM DARAT                 ‖
-============================================================''')
-        print("| 1. Create                                     |")
-        print("| 2. Read                                       |")
-        print("| 3. Update                                     |")
-        print("| 4. Delete                                     |")
-        print("| 5. Keluar                                     |")
+==================================================
+‖             MENU EKOSISTEM DARAT               ‖
+==================================================''')
+        print("| 1. Create                                      |")
+        print("| 2. Read                                        |")
+        print("| 3. Update                                      |")
+        print("| 4. Delete                                      |")
+        print("| 5. Sort                                        |")
+        print("| 6. Search                                      |")
+        print("| 7. Kembali ke Menu Sebelumnya                  |")
         print("==================================================")
 
         choice = input("Pilih menu: ")
@@ -316,6 +439,31 @@ class EkosistemDarat:
         elif choice == "4":
             self.delete(id_admin)
         elif choice == "5":
+            order = input("Masukkan urutan (asc/desc): ")
+            sorted_list_head = self.merge_sort_id_ekosistem(self.ekosistem_list.head, order)
+            if sorted_list_head:
+                current = sorted_list_head
+                table = prettytable.PrettyTable(["id_ekosistem", "nama_ekosistem", "id_admin", "lokasi_geografis", "status_ekosistem"])
+            while current:
+                table.add_row(current.data)
+                current = current.next
+            print("Data yang sudah diurutkan:")
+            print(table)
+        
+        elif choice == "6":
+            target = input("Masukkan nama ekosistem yang ingin dicari: ")
+            result = self.jump_search_nama_ekosistem(target)
+            if result != -1:
+                print("Data ditemukan:")
+                print(result)
+            else:
+                print("|         -----------------------------------------------------       |")
+                print("|                 Tidak Ditemukan Data Ekosistem Darat                |")
+                print("|         -----------------------------------------------------       |")
+            input("\nTekan Enter untuk kembali ke menu admin...")
+            clear()
+            self.menu(id_admin)
+        elif choice == "7":
             clear()
             menu_admin(id_admin)
 
@@ -324,6 +472,21 @@ class spesies_hewan:
     def __init__(self):
         self.connection = conn()
         self.hewan_list = DoubleLinkedList()
+    
+    def search_hewan(self, target):
+        if self.hewan_list.head is None:
+            print("Linked list spesies hewan kosong.")
+            return -1
+        
+        current = self.hewan_list.head
+
+        while current is not None:
+            if current.data[1] == target:
+                return current.data
+            current = current.next
+        
+        print(f"Data spesies hewan dengan nama '{target}' tidak ditemukan.")
+        return -1
 
     def create(self, id_admin):
         if self.connection:
@@ -347,7 +510,9 @@ class spesies_hewan:
                 self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memasukkan data ke database spesies hewan.")
+                print("|         -----------------------------------------------------       |")
+                print("|             Gagal Memasukan Data ke Database Spesies Hewan          |")
+                print("|         -----------------------------------------------------       |")
                 input("Tekan Enter untuk kembali ke menu user...")
                 clear()
                 self.menu(id_admin)
@@ -355,7 +520,9 @@ class spesies_hewan:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -379,21 +546,27 @@ class spesies_hewan:
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ada data spesies_hewan yang tersedia.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                     Data Spesies Hewan Tidak Tersedia               |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
                 cursor.close()
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal membaca data dari database spesies hewan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                     Data Spesies Hewan Gagal Dibaca                 |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
             finally:
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -416,21 +589,27 @@ class spesies_hewan:
                     clear()
                     menu_user(id_user)
                 else:
-                    print("Tidak ada data spesies_hewan yang tersedia.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                     Data Spesies Hewan Tidak Tersedia              |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu user...")
                     clear()
                     menu_user(id_user)
                 cursor.close()
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal membaca data dari database spesies hewan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                     Data Spesies Hewan Gagal Dibaca                 |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu user...")
                 clear()
                 menu_user(id_user)
             finally:
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu user...")
             clear()
             menu_user(id_user)
@@ -472,25 +651,33 @@ class spesies_hewan:
                     cursor.execute(update_query, update_values)
 
                     self.connection.commit()
-                    print("Data berhasil diperbarui di tabel spesies hewan.")
+                    print("|        --------------------------------------------------------       |")
+                    print("|          Data Spesies Hewan Berhasil Diperbarui Pada Database         |")
+                    print("|        --------------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data spesies hewan dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|            Spesies Hewan Dengan ID Tersebut Tidak Ditemukan         |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memperbarui data di tabel spesies hewan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                Gagal Memperbarui Data Spesies Hewan                 |")
+                print("|         -----------------------------------------------------       |")
                 input("Tekan Enter untuk kembali ke menu admin...")
                 self.menu(id_admin)
             finally:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -519,18 +706,24 @@ class spesies_hewan:
                         clear()
                         self.menu(id_admin)
                     else:
-                        print("Penghapusan data dibatalkan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|               Penghapusan Data Spesies Hewan Dibatalkan             |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu admin...")
                         clear()
                         self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data spesies hewan dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|            Tidak Ditemukan Spesies Hewan Dengan ID Tersebut         |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal menghapus data dari tabel spesies hewan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                   Gagal Menghapus Data Spesies Hewan                |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
@@ -538,7 +731,9 @@ class spesies_hewan:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -546,38 +741,75 @@ class spesies_hewan:
 
     def menu(self, id_admin):
         print('''
-==========================================================
-‖                     MENU SPESIES HEWAN                 ‖
-==========================================================''')
+==================================================
+‖                MENU SPESIES HEWAN              ‖
+==================================================''')
         print("| 1. Create                                      |")
         print("| 2. Read                                        |")
         print("| 3. Update                                      |")
         print("| 4. Delete                                      |")
-        print("| 5. Keluar                                      |")
+        print("| 5. Sort                                        |")
+        print("| 6. Search                                      |")
+        print("| 7. Kembali ke Menu Sebelumnya                  |")
         print("==================================================")
 
-        user_choice = input("Pilih menu: ")
+        choice = input("Pilih menu: ")
 
-        if user_choice == "1":
+        if choice == "1":
             self.create(id_admin)
-        elif user_choice == "2":
+        elif choice == "2":
             self.read(id_admin)
-        elif user_choice == "3":
+        elif choice == "3":
             self.update(id_admin)
-        elif user_choice == "4":
+        elif choice == "4":
             self.delete(id_admin)
-        elif user_choice == "5":
+        elif choice == "5":
+            sorted_list_head = self.search_hewan()
+            current = sorted_list_head
+            while current:
+                print(current.data)
+                current = current.next
+            input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
-            menu_admin
-        else:
-            input("Pilihan tidak valid. Silakan pilih kembali.")
-
+            self.menu(id_admin)
+        elif choice == "6":
+            target = input("Masukkan nama Hewan yang ingin dicari: ")
+            result = self.search_hewan(target)
+            if result != -1:
+                print("Data ditemukan:")
+                print(result)
+            else:
+                print("|         -----------------------------------------------------       |")
+                print("|                         Data Tidak Ditemukan                        |")
+                print("|         -----------------------------------------------------       |")
+            input("\nTekan Enter untuk kembali ke menu admin...")
+            clear()
+            self.menu(id_admin)
+        elif choice == "7":
+            clear()
+            menu_admin(id_admin)
 
 
 class spesies_tumbuhan:
     def __init__(self):
         self.connection = conn()
         self.tumbuhan_list = DoubleLinkedList()
+        
+        
+    def search_tumbuhan(self, target):
+        if self.tumbuhan_list.head is None:
+            print("Linked list spesies tumbuhan kosong.")
+            return -1
+        
+        current = self.tumbuhan_list.head
+
+        while current is not None:
+            if current.data[1] == target:
+                return current.data
+            current = current.next
+        
+        print(f"Data spesies tumbuhan dengan nama '{target}' tidak ditemukan.")
+        return -1
 
     def create(self, id_admin):
         if self.connection:
@@ -601,7 +833,9 @@ class spesies_tumbuhan:
                 self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memasukkan data ke database spesies tumbuhan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                Gagal Masuk ke Database Spesies Tumbuhan             |")
+                print("|         -----------------------------------------------------       |")
                 input("Tekan Enter untuk kembali ke menu user...")
                 clear()
                 self.menu(id_admin)
@@ -609,7 +843,9 @@ class spesies_tumbuhan:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -632,21 +868,27 @@ class spesies_tumbuhan:
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ada data spesies tumbuhan yang tersedia.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                   Data Spesies Tumbuhan Tidak Tersedia              |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
                 cursor.close()
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal membaca data dari database spesies tumbuhan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                   Data Spesies Tumbuhan Gagal Dibaca                |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
             finally:
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -669,21 +911,27 @@ class spesies_tumbuhan:
                     clear()
                     menu_user(id_user)
                 else:
-                    print("Tidak ada data spesies tumbuhan yang tersedia.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                   Data Spesies Tumbuhan Tidak Tersedia              |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu user...")
                     clear()
                     menu_user(id_user)
                 cursor.close()
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal membaca data dari database spesies tumbuhan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                   Data Spesies Tumbuhan Gagal Dibaca                |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu user...")
                 clear()
                 menu_user(id_user)
             finally:
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu user...")
             clear()
             menu_user(id_user)
@@ -725,25 +973,33 @@ class spesies_tumbuhan:
                     cursor.execute(update_query, update_values)
 
                     self.connection.commit()
-                    print("Data berhasil diperbarui di tabel spesies tumbuhan.")
+                    print("|        --------------------------------------------------------       |")
+                    print("|        Data Spesies Tumbuhan Berhasil Diperbarui Pada Database        |")
+                    print("|        --------------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data spesies tumbuhan dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|          Spesies Tumbuhan Dengan ID Tersebut Tidak Ditemukan        |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memperbarui data di tabel spesies tumbuhan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                 Gagal Memperbarui Data Spesies Tumbuhan             |")
+                print("|         -----------------------------------------------------       |")
                 input("Tekan Enter untuk kembali ke menu admin...")
                 self.menu(id_admin)
             finally:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -767,23 +1023,31 @@ class spesies_tumbuhan:
                         delete_query = "DELETE FROM spesies_tumbuhan WHERE id_tumbuhan = %s"
                         cursor.execute(delete_query, (id_tumbuhan,))
                         self.connection.commit()
-                        print("Data berhasil dihapus dari tabel spesies tumbuhan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                         Data Berhasil Dihapus                       |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu admin...")
                         clear()
                         self.menu(id_admin)
                     else:
-                        print("Penghapusan data dibatalkan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                       Penghapusan Data Dibatalkan                   |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu admin...")
                         clear()
                         self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data spesies tumbuhan dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|          Spesies Tumbuhan Dengan ID Tersebut Tidak Ditemukan        |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal menghapus data dari tabel spesies tumbuhan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                 Gagal Menghapus Data Spesies Tumbuhan               |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
@@ -791,39 +1055,58 @@ class spesies_tumbuhan:
                 cursor.close()
                 self.connection.close()
         else:
-            print("Tidak dapat terhubung ke database.")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
 
     def menu(self, id_admin):
         print('''
-==========================================================
-‖                  MENU SPESIES TUMBUHAN                  ‖
-==========================================================''')
+==================================================
+‖             MENU SPESIES TUMBUHAN              ‖
+==================================================''')
         print("| 1. Create                                      |")
         print("| 2. Read                                        |")
         print("| 3. Update                                      |")
         print("| 4. Delete                                      |")
-        print("| 5. Keluar                                      |")
+        print("| 5. Sort                                        |")
+        print("| 6. Search                                      |")
+        print("| 7. Kembali ke Menu Sebelumnya                                      |")
         print("==================================================")
+        choice = input("Pilih menu: ")
 
-        user_choice = input("Pilih menu: ")
-
-        if user_choice == "1":
+        if choice == "1":
             self.create(id_admin)
-        elif user_choice == "2":
+        elif choice == "2":
             self.read(id_admin)
-        elif user_choice == "3":
+        elif choice == "3":
             self.update(id_admin)
-        elif user_choice == "4":
+        elif choice == "4":
             self.delete(id_admin)
-        elif user_choice == "5":
+        elif choice == "5":
+            sorted_list_head = self.merge_sort_id_ekosistem()
+            current = sorted_list_head
+            while current:
+                print(current.data)
+                current = current.next
+            input("\nTekan Enter untuk kembali ke menu admin...")
+            clear()
+            self.menu(id_admin)
+        elif choice == "6":
+            target = input("Masukkan nama Tumbuhan yang ingin dicari: ")
+            result = self.search_tumbuhan(target)
+            if result != -1:
+                print("Data ditemukan:")
+                print(result)
+            else:
+                print("|         -----------------------------------------------------       |")
+                print("|                           Data Tidak Ditemukan                      |")
+                print("|         -----------------------------------------------------       |")
+            input("\nTekan Enter untuk kembali ke menu admin...")
+            clear()
+            self.menu(id_admin)
+        elif choice == "7":
             clear()
             menu_admin(id_admin)
-        else:
-            input("Pilihan tidak valid. Silakan pilih kembali.")
-
 
 
 class laporan:
@@ -858,28 +1141,37 @@ class laporan:
                         print("ID User:", id_user)
                         print("ID Admin:", random_admin_id)
 
-                        print("\n!!!PERINGATAN!!!")
-                        print("Jika laporan bersifat tidak valid maka admin berhak menghapus laporan anda\n")
+                        print("|     -------------------------------------------------------------------       |")
+                        print("|                               PERINGATAN!!!                                   |")
+                        print("|     -------------------------------------------------------------------       |")
+                        print("|      Jika laporan anda tidak valid, admin dapat menghapus laporan anda        |")
+                        print("|     -------------------------------------------------------------------       |")
                         input("Tekan Enter untuk kembali ke menu user...")
                         clear()
                         menu_user(id_user)
                     else:
-                        print("Tidak ada admin yang tersedia untuk membuat laporan.")
-                        input("")
+                        print("|         -----------------------------------------------------       |")
+                        print("|          Tidak Ada Admin Yang Tersedia Untuk Membuat Laporan        |")
+                        print("|         -----------------------------------------------------       |")
+                        input("Tekan Enter untuk melanjutkan...")
                         clear()
                         menu_user(id_user)
                 except mysql.connector.Error as err:
                     print("Error:", err)
-                    print("Gagal membuat laporan.")
-                    input("")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                           Gagal Membuat Laporan                     |")
+                    print("|         -----------------------------------------------------       |")
+                    input("Tekan Enter untuk melanjutkan...")
                     clear()
                     menu_user(id_user)
                 finally:
                     cursor.close()
                     self.connection.close()
             else:
-                print("Tidak dapat terhubung ke database.")
-                input("")
+                print("|         -----------------------------------------------------       |")
+                print("|                   Tidak Dapat Terhubung Ke Database                 |")
+                print("|         -----------------------------------------------------       |")
+                input("Tekan enter untuk melanjutkan...")
                 clear()
                 menu_user(id_user)
 
@@ -899,12 +1191,16 @@ class laporan:
                         clear()
                         self.menu(id_admin)
                     else:
-                        input("Tidak ada data laporan yang tersedia.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                     Data Laporan Tidak Tersedia                     |")
+                        print("|         -----------------------------------------------------       |")
                         clear()
                         self.menu(id_admin)
                 except mysql.connector.Error as err:
                     print("Error:", err)
-                    print("Gagal membaca data dari tabel laporan.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                       Data Laporan Gagal Dibaca                     |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
@@ -912,7 +1208,9 @@ class laporan:
                     cursor.close()
                     self.connection.close()
             else:
-                print("Tidak dapat terhubung ke database.")
+                print("|         -----------------------------------------------------       |")
+                print("|                   Tidak Dapat Terhubung Ke Database                 |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
@@ -961,20 +1259,25 @@ class laporan:
                         cursor.execute(update_query, update_values)
 
                         self.connection.commit()
-                        print("Data berhasil diperbarui di tabel laporan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|             Data Laporan Berhasil Diperbarui Pada Database          |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu admin...")
                         clear()
                         self.menu(id_admin)
                     else:
-                        print("Tidak ditemukan data laporan dengan ID tersebut.")
-
-                    input("Tekan Enter untuk kembali ke menu admin...")
-                    clear()
-                    self.menu(id_admin)
+                        print("|         -----------------------------------------------------       |")
+                        print("|               Laporan Dengan ID Tersebut Tidak Ditemukan              |")
+                        print("|         -----------------------------------------------------       |")
+                        input("Tekan Enter untuk kembali ke menu admin...")
+                        clear()
+                        self.menu(id_admin)
 
                 except mysql.connector.Error as err:
                     print("Error:", err)
-                    print("Gagal memperbarui data di tabel laporan.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                    Gagal Memperbarui Data Laporan                   |")
+                    print("|         -----------------------------------------------------       |")
                     input("Tekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
@@ -983,7 +1286,9 @@ class laporan:
                     cursor.close()
                     self.connection.close()
             else:
-                input("Tidak dapat terhubung ke database.")
+                print("|         -----------------------------------------------------       |")
+                print("|                   Tidak Dapat Terhubung Ke Database                 |")
+                print("|         -----------------------------------------------------       |")
                 clear()
                 self.menu(id_admin)
 
@@ -1015,20 +1320,32 @@ class laporan:
                         delete_query = "DELETE FROM laporan WHERE id_laporan = %s"
                         cursor.execute(delete_query, (id_laporan,))
                         self.connection.commit()
-                        input("Data berhasil dihapus dari tabel laporan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                           Data Berhasil Di Hapus                    |")
+                        print("|         -----------------------------------------------------       |")
+                        input("\nTekan enter untuk melanjutkan....")
                         self.menu(id_admin)
                         clear()
                     else:
-                        input("Penghapusan data dibatalkan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                             Data Gagal Di Hapus                     |")
+                        print("|         -----------------------------------------------------       |")
+                        input("\nTekan enter untuk melanjutkan....")
                         clear()
                         self.menu(id_admin)
                 else:
-                    input("Tidak ditemukan data laporan dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|             Data Laporan Dengan ID Tersebut Tidak Ditemukan         |")
+                    print("|         -----------------------------------------------------       |")
+                    input("\nTekan enter untuk melanjutkan....")
                     self.menu(id_admin)
 
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal menghapus data dari tabel laporan.")
+                print("|         -----------------------------------------------------       |")
+                print("|                      Gagal Menghapus Data Laporan                   |")
+                print("|         -----------------------------------------------------       |")
+                input("\nTekan enter untuk melanjutkan....")
                 clear()
                 self.menu(id_admin)
 
@@ -1036,7 +1353,10 @@ class laporan:
                 cursor.close()
                 self.connection.close()
         else:
-            input("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
+            input("\nTekan enter untuk melanjutkan....")
             clear()
             menu_admin(id_admin)
 
@@ -1045,10 +1365,10 @@ class laporan:
 ==================================================
 ‖                    MENU LAPORAN                ‖
 ==================================================''')
-            print("| 1. Baca Laporan                               |")
-            print("| 2. Update Laporan                             |")
-            print("| 3. Hapus Laporan                              |")
-            print("| 4. Keluar                                     |")
+            print("| 1. Baca Laporan                                |")
+            print("| 2. Update Laporan                              |")
+            print("| 3. Hapus Laporan                               |")
+            print("| 4. Kembali ke Menu Sebelumnya                  |")
             print("==================================================")
 
             user_choice = input("Pilih menu: ")
@@ -1063,8 +1383,12 @@ class laporan:
                 clear()
                 menu_admin(id_admin)
             else:
-                input("Pilihan tidak valid. Silakan pilih kembali.")
-
+                print("|         -----------------------------------------------------       |")
+                print("|                        Pilihan Tidak Valid                          |")
+                print("|         -----------------------------------------------------       |")
+                print("|                       Silahkan Pilih Kembali                        |")
+                print("|         -----------------------------------------------------       |")
+                input("\nTekan enter untuk melanjutkan....")
 
 
 class user:
@@ -1086,7 +1410,9 @@ class user:
                 cursor.execute(query, data)
 
                 self.connection.commit()
-                print("\nData user berhasil dimasukkan ke database.")
+                print("|         -----------------------------------------------------       |")
+                print("|                     Data User Berhasil Ditambahkan                  |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu user...")
                 clear()
                 self.menu(id_admin)
@@ -1094,14 +1420,18 @@ class user:
                 self.user_list.append((cursor.lastrowid, nama_user, password, no_telpon))
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memasukkan data user ke database.")
+                print("|         -----------------------------------------------------       |")
+                print("|                        Gagal Menemukan Data User                    |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu user...")
                 clear()
                 self.menu(id_admin)
             finally:
                 cursor.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu user...")
             clear()
             self.menu(id_admin)
@@ -1122,20 +1452,26 @@ class user:
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ada data user yang tersedia.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                      Data User Tidak Tersedia                       |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu user...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal membaca data user dari database.")
+                print("|         -----------------------------------------------------       |")
+                print("|                        Data User Gagal Dibaca                      |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu user...")
                 clear()
                 self.menu(id_admin)
             finally:
                 cursor.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu user...")
             clear()
             self.menu(id_admin)
@@ -1177,25 +1513,33 @@ class user:
                     cursor.execute(update_query, update_values)
 
                     self.connection.commit()
-                    print("Data user berhasil diperbarui.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                     Data User Berhasil Diperbarui                   |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu user...")
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data user dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|               User Dengan ID Tersebut Tidak Ditemukan               |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu user...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memperbarui data user.")
+                print("|         -----------------------------------------------------       |")
+                print("|                       Data User Gagal Diperbarui                    |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu user...")
                 clear()
                 self.menu(id_admin)
             finally:
                 cursor.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu user...")
             clear()
             self.menu(id_admin)
@@ -1219,12 +1563,16 @@ class user:
                         delete_query = "DELETE FROM user WHERE id_user = %s"
                         cursor.execute(delete_query, (id_user_to_delete,))
                         self.connection.commit()
-                        print("Data user berhasil dihapus.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                      Data User Berhasil Dihapus                     |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu user...")
                         clear()
                         self.menu(id_admin)
                     else:
-                        print("Penghapusan data user dibatalkan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                   Penghapusan Data User Dibatalkan                  |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu user...")
                         clear()
                         self.menu(id_admin)
@@ -1232,29 +1580,33 @@ class user:
                     print("Tidak ditemukan data user dengan ID tersebut.")
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal menghapus data user.")
+                print("|         -----------------------------------------------------       |")
+                print("|                         Data User Gagal Dihapus                     |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu user...")
                 clear()
                 self.menu(id_admin)
             finally:
                 cursor.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu user...")
             clear()
             self.menu(id_admin)
 
     def menu(self, id_admin):
         print('''
-==========================================================
-‖                    MENU ADMINISTRASI USER              ‖
-==========================================================''')
+=====================================================
+‖                 MENU ADMINISTRASI USER            ‖
+=====================================================''')
         print("| 1. Create User                                    |")
         print("| 2. Read User                                      |")
         print("| 3. Update User                                    |")
         print("| 4. Delete User                                    |")
-        print("| 5. Keluar                                         |")
-        print("======================================================")
+        print("| 5. Kembali ke Menu Sebelumnya                     |")
+        print("=====================================================")
 
         user_choice = input("Pilih menu: ")
 
@@ -1274,7 +1626,12 @@ class user:
             clear()
             menu_admin(id_admin)
         else:
-            input("Pilihan tidak valid. Silakan pilih kembali.")
+            print("|         -----------------------------------------------------       |")
+            print("|                        Pilihan Tidak Valid                          |")
+            print("|         -----------------------------------------------------       |")
+            print("|                       Silahkan Pilih Kembali                        |")
+            print("|         -----------------------------------------------------       |")
+            input("\nTekan enter untuk melanjutkan....")
 
 
 
@@ -1297,7 +1654,9 @@ class admin:
                 cursor.execute(query, data)
 
                 self.connection.commit()
-                print("\nData admin berhasil dimasukkan ke database.")
+                print("|         -----------------------------------------------------       |")
+                print("|                Data Admin Berhasil Dimasukkan Database              |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
@@ -1305,14 +1664,18 @@ class admin:
                 self.admin_list.append((cursor.lastrowid, nama_admin, password, no_telpon))
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memasukkan data admin ke database.")
+                print("|         -----------------------------------------------------       |")
+                print("|                      Data Admin Gagal Dimasukkan                    |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
             finally:
                 cursor.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -1333,20 +1696,26 @@ class admin:
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ada data admin yang tersedia.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                       Data Admin Tidak Tersedia                     |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal membaca data admin dari database.")
+                print("|         -----------------------------------------------------       |")
+                print("|                        Data Admin Gagal Dibaca                      |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
             finally:
                 cursor.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -1388,25 +1757,33 @@ class admin:
                     cursor.execute(update_query, update_values)
 
                     self.connection.commit()
-                    print("Data admin berhasil diperbarui.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|                    Data Admin Berhasil Diperbarui                   |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data admin dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|               Admin Dengan ID Tersebut Tidak Ditemukan              |")
+                    print("|         -----------------------------------------------------       |")
                     input("\nTekan Enter untuk kembali ke menu admin...")
                     clear()
                     self.menu(id_admin)
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal memperbarui data admin.")
+                print("|         -----------------------------------------------------       |")
+                print("|                     Gagal Memperbarui Data Admin                    |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
             finally:
                 cursor.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung Ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
@@ -1430,42 +1807,53 @@ class admin:
                         delete_query = "DELETE FROM admin WHERE id_admin = %s"
                         cursor.execute(delete_query, (id_admin_to_delete,))
                         self.connection.commit()
-                        print("Data admin berhasil dihapus.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                    Data Admin Berhasilih Dihapus                    |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu admin...")
                         clear()
                         self.menu(id_admin)
                     else:
-                        print("Penghapusan data admin dibatalkan.")
+                        print("|         -----------------------------------------------------       |")
+                        print("|                   Penghapusan Data Admin Dibatalkan                 |")
+                        print("|         -----------------------------------------------------       |")
                         input("\nTekan Enter untuk kembali ke menu admin...")
                         clear()
                         self.menu(id_admin)
                 else:
-                    print("Tidak ditemukan data admin dengan ID tersebut.")
+                    print("|         -----------------------------------------------------       |")
+                    print("|            Data Admin Dengan ID Tersebut Tidak Ditemukan            |")
+                    print("|         -----------------------------------------------------       |")
+                    input("\nTekan Enter untuk kembali ke menu admin...")
             except mysql.connector.Error as err:
                 print("Error:", err)
-                print("Gagal menghapus data admin.")
+                print("|         -----------------------------------------------------       |")
+                print("|                       Gagal Menghapus Data Admin                    |")
+                print("|         -----------------------------------------------------       |")
                 input("\nTekan Enter untuk kembali ke menu admin...")
                 clear()
                 self.menu(id_admin)
             finally:
                 cursor.close()
         else:
-            print("Tidak dapat terhubung ke database.")
+            print("|         -----------------------------------------------------       |")
+            print("|                   Tidak Dapat Terhubung ke Database                 |")
+            print("|         -----------------------------------------------------       |")
             input("\nTekan Enter untuk kembali ke menu admin...")
             clear()
             self.menu(id_admin)
 
     def menu(self, id_admin):
         print('''
-==========================================================
-‖                  MENU ADMINISTRASI ADMIN               ‖
-==========================================================''')
+=====================================================
+‖               MENU ADMINISTRASI ADMIN             ‖
+=====================================================''')
         print("| 1. Create Admin                                   |")
         print("| 2. Read Admin                                     |")
         print("| 3. Update Admin                                   |")
         print("| 4. Delete Admin                                   |")
-        print("| 5. Keluar                                         |")
-        print("======================================================")
+        print("| 5. Kembali ke Menu Sebelumnya                     |")
+        print("=====================================================")
 
         user_choice = input("Pilih menu: ")
 
@@ -1485,7 +1873,10 @@ class admin:
             clear()
             menu_admin(id_admin)
         else:
-            input("Pilihan tidak valid. Silakan pilih kembali.")
+            print("|         -----------------------------------------------------       |")
+            print("|                        Pilihan Tidak Valid                          |")
+            print("|         -----------------------------------------------------       |")
+            input("\nTekan enter untuk melanjutkan....")
 
 
 
@@ -1501,7 +1892,7 @@ def menu_admin(id_admin):
     print("| 4. Laporan                                     |")
     print("| 5. User                                        |")
     print("| 6. Admin                                       |")
-    print("| 7. Keluar                                      |")
+    print("| 7. Kembali ke Menu Sebelumnya                  |")
     print("==================================================")
 
     user_choice = input("Pilih menu: ")
@@ -1531,12 +1922,19 @@ def menu_admin(id_admin):
         adminn = admin()
         adminn.menu(id_admin)
     elif user_choice == "7":
-        input("Keluar dari menu admin.")
+        clear()
+        print("\t\t\t Keluar dari Menu Admin.....")
+        time.sleep(1)
         clear()
         return
 
     else:
-        input("Pilihan tidak valid. Silakan pilih kembali.")
+        print("|         -----------------------------------------------------       |")
+        print("|                        Pilihan Tidak Valid                          |")
+        print("|         -----------------------------------------------------       |")
+        print("|                       Silahkan Pilih Kembali                        |")
+        print("|         -----------------------------------------------------       |")
+        input("\nTekan enter untuk melanjutkan....")
         clear()
         menu_admin(id_admin)
 
@@ -1549,7 +1947,7 @@ def menu_user(id_user):
     print("| 2. Baca Spesies Hewan                          |")
     print("| 3. Baca Spesies Tumbuhan                       |")
     print("| 4. Membuat Laporan                             |")
-    print("| 5. Keluar                                      |")
+    print("| 5. Kembali ke Menu Awal                        |")
     print("==================================================")
 
     user_choice = input("Pilih menu: ")
@@ -1571,12 +1969,19 @@ def menu_user(id_user):
         lapor = laporan()
         lapor.create(id_user)
     elif user_choice == "5":
-        input("Keluar dari menu user.")
+        clear()
+        print("\t\t\t Keluar dari Menu User.....")
+        time.sleep(1)
         clear()
         return
 
     else:
-        input("Pilihan tidak valid. Silakan pilih kembali.")
+        print("|         -----------------------------------------------------       |")
+        print("|                        Pilihan Tidak Valid                          |")
+        print("|         -----------------------------------------------------       |")
+        print("|                       Silahkan Pilih Kembali                        |")
+        print("|         -----------------------------------------------------       |")
+        input("\nTekan enter untuk melanjutkan....")
         clear()
         menu_user(id_user)
 
@@ -1590,7 +1995,7 @@ def login_admin():
 ‖                   LOGIN ADMIN                  ‖
 ==================================================\n''')
     nama_admin = input("Masukkan nama admin: ")
-    password = input("Masukkan password: ")
+    password = pwinput.pwinput(prompt="Masukkan password: ")
 
     connection = conn()
     if connection:
@@ -1600,12 +2005,17 @@ def login_admin():
         admin = cursor.fetchone()
 
         if admin:
-            input("Login berhasil sebagai admin!")
+            clear()
+            print("\t\t\t Login Berhasil.....")
+            time.sleep(1)
             clear()
             id_admin = admin[0]  # Ambil ID user dari hasil query
             menu_admin(id_admin)  # Teruskan ID user ke fungsi menu_user()
         else:
-            input("Nama admin atau password salah.")
+            print("|         -----------------------------------------------------        |")
+            print("|                      Nama Admin atau Password Salah                  |")
+            print("|         -----------------------------------------------------        |")
+            input("\nTekan enter untuk melanjutkan....")
             clear()
         
         cursor.close()
@@ -1618,7 +2028,7 @@ def login_user():
 ‖                   LOGIN USER                   ‖
 ==================================================\n''')
     nama_user = input("Masukkan nama user: ")
-    password = input("Masukkan password: ")
+    password = pwinput.pwinput(prompt="Masukkan password: ")
 
     connection_db = conn()  # Menggunakan nama yang berbeda untuk fungsi dan variabel
     if connection_db:
@@ -1628,12 +2038,17 @@ def login_user():
         user = cursor.fetchone()
 
         if user:
-            input("Login berhasil sebagai user!")
+            clear()
+            print("\t\t\t Login Berhasil.....")
+            time.sleep(1)
             clear()
             id_user = user[0]  # Ambil ID user dari hasil query
             menu_user(id_user)
         else:
-            input("Nama user atau password salah.")
+            print("|         -----------------------------------------------------        |")
+            print("|              Nama User atau Nomor Telpon Sudah Digunakan             |")
+            print("|         -----------------------------------------------------        |")
+            input("\nTekan enter untuk melanjutkan....")
             clear()
         
         cursor.close()
@@ -1672,7 +2087,10 @@ def create_user_account():
         try:
             cursor.execute(query_insert, (nama_user, password, no_telpon))
             connection.commit()
-            input("Akun user berhasil dibuat.")
+            print("\n|         -----------------------------------------------------        |")
+            print("|                          AKUN BERHASIL DIBUAT                        |")
+            print("|         -----------------------------------------------------        |")
+            input("\nTekan enter untuk melanjutkan....")
             clear()
         except mysql.connector.Error as err:
             err_conn(err)
@@ -1691,7 +2109,12 @@ def create_admin_account():
     kode_admin = input("Masukkan kode admin: ")
 
     if kode_admin != "192193":
-        input("Kode admin salah. Pembuatan akun dibatalkan.")
+        print("\n|         -----------------------------------------------------        |")
+        print("|                             KODE ADMIN SALAH                         |")
+        print("|         -----------------------------------------------------        |")
+        print("|                        PEMBUATAN AKUN DIBATALKAN                     |")
+        print("|         -----------------------------------------------------        |")
+        input("Tekan enter untuk melanjutkan ...")
         return
 
     connection = connection()
@@ -1718,7 +2141,10 @@ def create_admin_account():
         try:
             cursor.execute(query_insert, (nama_admin, password, no_telpon))
             connection.commit()
-            input("Akun admin berhasil dibuat.")
+            print("|         -----------------------------------------------------        |")
+            print("|                       PEMBUATAN AKUN BERHASIL                        |")
+            print("|         -----------------------------------------------------        |")
+            input("Tekan enter untuk melanjutkan ...")
             clear()
         except mysql.connector.Error as err:
             clear() #kalau bagian ini ada kehapus berarti tempat clearnya salah
@@ -1735,15 +2161,16 @@ def create_admin_account():
 def main():
     while True:
         clear()
-        print('''
-==================================================
-‖                    MENU LOGIN                  ‖
-==================================================''')
-        print("| 1. Login user                                  |")
-        print("| 2. Login admin                                 |")
-        print("| 3. Buat Akun                                   |")
-        print("| 0. Keluar                                      |")
-        print("==================================================")
+        print("+====================================================================+")
+        print("|                           SELAMAT DATANG                           |")
+        print("|   DI PROGRAM SISTEM INFORMASI EKOSISTEM DARAT DI KALIMANTAN TIMUR  |")
+        print("|    OLEH : KELOMPOK 5 - SISTEM INFORMASI - UNIVERSITAS MULAWARMAN   |")
+        print("+====================================================================+")
+        print("| 1. Login user                                                      |")
+        print("| 2. Login admin                                                     |")
+        print("| 3. Buat Akun                                                       |")
+        print("| 0. Keluar                                                          |")
+        print("+====================================================================+")
 
         choice = input("Pilih menu: ")
 
@@ -1767,8 +2194,6 @@ def main():
             print("|                                  |||                                 |")
             print("|                         UNIVERSITAS MULAWARMAN                       |")
             print("✦======================================================================✦")
-            input("")
-            clear()
             quit()
         else:
             clear()
