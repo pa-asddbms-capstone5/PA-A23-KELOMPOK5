@@ -36,16 +36,18 @@ Beberapa fitur yang terdapat dalam program meliputi :
 5. Sort : Admin dapat melakukan sorting pada database untuk merapikan isinya dengan mengurutkan id mereka
 6. Search : Admin dapat melakukan pencarian dengan search keyword dari nama suatu databasenya yang terdaftar
 
-## Cara Penggunaan
+## Cara Penggunaan untuk user
 1. Saat program dimulai, program akan menampilkan menu utama yang terdiri atas 3 menu, yaitu 1) login, 2) daftar, 3) keluar.
 2. Pilih daftar untuk mendaftarkan akun user
 3. Masukkan nama, password (wajib 10 angka/huruf), nomor telepon (wajib 12 angka)
 4. Anda akan dikembalikan ke menu login, kemudian pilih login
 5. Masukkan nama dan password yang telah dibuat tadi
-6. Setelah login berhasil, akan ditampilkan menu Read Ekosistem Darat, Read Spesies Hewan, Read Spesies Tumbuhan, Create Laporan dan Delete
-7. Keluar/Logout jika sudah selesai
-
-
+6. Setelah login berhasil, akan ditampilkan menu Read Ekosistem Darat, Read Spesies Hewan, Read Spesies Tumbuhan, Create Laporan dan Delete, Keluar
+7. Pada menu Read Ekosistem Darat, akan menampilkan data-data dari Ekosistem Darat yaitu id_ekosistem, nama_ekosistem, id_admin, lokasi_geografis, status_ekosistem dalam bentuk tabel
+8. Pada menu Read Spesies Hewan, akan menampilkan data-data dari Spesies Hewan yaitu id_hewan, nama_hewan, id_ekosistem, status_populasi, status_perlindungan dalam bentuk tabel
+9. Pada menu Read Spesies Tumbuhan, akan menampilkan data-data dari Spesies Tumbuhan yaitu id_tumbuhan, nama_tumbuhan, id_ekosistem, status_populasi, status_perlindungan dalam bentuk tabel
+10. Pada menu Create Laporan, user akan diminta untuk mengetik sebuah laporan, kemudian laporan itu akan masuk dalam database. Harap diingat bahwa laporan tidak boleh bersifat fiktif/hoax karena laporan akan diverifikasi oleh admin tertentu
+11. Jika sudah selesai, user dapat melakukan logout dan keluar dari aplikasi
    
 ## Dokumentasi Menu
 ### Tampilan Menu
