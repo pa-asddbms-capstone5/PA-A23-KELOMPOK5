@@ -9,30 +9,31 @@ import time
 def clear():
     os.system("cls" if os.name == "nt" else "clear")
 
-# Server lokal jika terjadi error
-# def conn():
-#     try:
-#         connection = mysql.connector.connect(
-#             host="localhost",
-#             user="root", 
-#             password="",
-#             database="paasd"
-#         )
-#         return connection
-#     except:
-#         input("Error:")
 
 def conn():
     try:
         connection = mysql.connector.connect(
-            host="103.54.170.117",
-            user="paasd", 
-            password="Paasd1234!",
+            host="localhost",
+            user="root", 
+            password="",
             database="paasd"
         )
         return connection
     except:
         input("Error:")
+
+# Server online
+# def conn():
+#     try:
+#         connection = mysql.connector.connect(
+#             host="103.54.170.117",
+#             user="paasd", 
+#             password="Paasd1234!",
+#             database="paasd"
+#         )
+#         return connection
+#     except:
+#         input("Error:")
 
 
 def err_conn(err):
