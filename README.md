@@ -1,9 +1,9 @@
 # PA-A23-KELOMPOK 5
 
 ## Anggota Kelompok
-### 1. Adinda Salsabilla Naura (23091160
-### 2. Nova Nur Fauziah (23091160
-### 3. Khalil Pradipta Lee (23091160
+### 1. Adinda Salsabilla Naura (2309116023)
+### 2. Nova Nur Fauziah (2309116043)
+### 3. Khalil Pradipta Lee (2309116046)
 
 ## Deskripsi Program
 Aplikasi yang dibuat sebagai tempat untuk mempermudah masyarakat mengetahui dan juga melakukan tindakan untuk lingkungan di darat terkhusus di Kalimantan Timur. aplikasi ini meliputi informasi dan juga tempat pelaporan mengenai keadaan ekosistem darat di Kalimantan Timur.
