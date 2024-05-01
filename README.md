@@ -44,3 +44,46 @@ Beberapa fitur yang terdapat dalam program meliputi :
 5. Masukkan nama dan password yang telah dibuat tadi
 6. Setelah login berhasil, akan ditampilkan menu Read Ekosistem Darat, Read Spesies Hewan, Read Spesies Tumbuhan, Create Laporan dan Delete
 7. Keluar/Logout jika sudah selesai
+
+
+   
+## Dokumentasi Menu
+```
+==================================================
+‖                    MENU LOGIN                  ‖
+==================================================
+| 1. Login user                                  |
+| 2. Login admin                                 |
+| 3. Buat Akun                                   |
+| 0. Keluar                                      |
+==================================================
+Pilih menu:
+```
+
+```
+==================================================
+‖                    MENU USER                   ‖
+==================================================
+| 1. Baca Ekosistem Darat                        |
+| 2. Baca Spesies Hewan                          |
+| 3. Baca Spesies Tumbuhan                       |
+| 4. Membuat Laporan                             |
+| 5. Kembali ke Menu Awal                        |
+==================================================
+Pilih menu:
+```
+
+```
+==================================================
+‖                     MENU ADMIN                 ‖
+==================================================
+| 1. Ekosistem Darat                             |
+| 2. Spesies Hewan                               |
+| 3. Spesies Tumbuhan                            |
+| 4. Laporan                                     |
+| 5. User                                        |
+| 6. Admin                                       |
+| 7. Kembali ke Menu Sebelumnya                  |
+==================================================
+Pilih menu:
+```
